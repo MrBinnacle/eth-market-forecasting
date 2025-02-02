@@ -1,0 +1,21 @@
+.env
+__pycache__/
+venv/
+*.log
+*.db
+eth_forecast_model.pkl
+# Ignore virtual environment
+venv/
+__pycache__/
+*.pyc
+
+# Ignore environment variables & API keys
+.env
+
+# Ignore data files and logs
+backend/data_pipeline/market_data.db
+logs/
+
+# Ignore compiled & cache files
+*.pkl
+*.joblib
