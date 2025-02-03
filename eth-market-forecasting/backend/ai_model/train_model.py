@@ -1,14 +1,14 @@
-import os
 import sqlite3
-import numpy as np
 import pandas as pd
-import xgboost as xgb
-import joblib
+import numpy as np
 import logging
+import os
+import joblib
 from datetime import datetime
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_absolute_error, mean_squared_error
 from dotenv import load_dotenv
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 
 # Load environment variables
 load_dotenv()
@@ -16,155 +16,148 @@ load_dotenv()
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-# Paths
+# Database and model paths
 DB_PATH = "backend/data_pipeline/market_data.db"
 MODEL_PATH = "backend/ai_model/eth_forecast_model.pkl"
 
-
 def load_data():
     """
-    Loads ETH market data along with market share and gas price data from the SQLite database.
+    Loads market data from SQLite database.
+    
     Returns:
-        DataFrame: A preprocessed DataFrame ready for training, or None on failure.
+        DataFrame: Pandas DataFrame with relevant features.
     """
     try:
         with sqlite3.connect(DB_PATH) as conn:
-            # Load datasets from their respective tables
-            eth_price = pd.read_sql_query("SELECT * FROM eth_price", conn)
-            market_share = pd.read_sql_query("SELECT * FROM market_share", conn)
-            gas_price = pd.read_sql_query("SELECT * FROM gas_price", conn)
+            query = """
+    SELECT e.timestamp, e.price, 
+           COALESCE(m.volume_usd, 0) AS volume_usd, 
+           COALESCE(g.average, 0) AS gas_price
+    FROM eth_price e
+    LEFT JOIN market_share m ON m.timestamp = (
+        SELECT timestamp FROM market_share 
+        WHERE timestamp <= e.timestamp 
+        ORDER BY timestamp DESC LIMIT 1
+    )
+    LEFT JOIN gas_price g ON g.timestamp = (
+        SELECT timestamp FROM gas_price 
+        WHERE timestamp <= e.timestamp 
+        ORDER BY timestamp DESC LIMIT 1
+    )
+    ORDER BY e.timestamp ASC;
+"""
+            df = pd.read_sql(query, conn)
 
-        # Convert timestamps to datetime
-        eth_price["timestamp"] = pd.to_datetime(eth_price["timestamp"])
-        market_share["timestamp"] = pd.to_datetime(market_share["timestamp"])
-        gas_price["timestamp"] = pd.to_datetime(gas_price["timestamp"])
+        if df.empty:
+            logging.error("❌ Loaded dataset is empty.")
+            return None
 
-        # Merge datasets on timestamp using left joins to preserve ETH price data
-        merged_data = eth_price.merge(market_share, on="timestamp", how="left") \
-                               .merge(gas_price, on="timestamp", how="left")
-
-        # Drop any ambiguous or unused ID columns if present
-        merged_data.drop(columns=["id", "id_x", "id_y"], errors="ignore", inplace=True)
-
-        logging.info(f"✅ Loaded dataset with {len(merged_data)} rows.")
-        return merged_data
+        logging.info(f"✅ Loaded dataset with {len(df)} rows.")
+        return df
 
     except sqlite3.Error as e:
         logging.error(f"❌ Database error while loading data: {e}")
+        return None
     except Exception as e:
         logging.error(f"❌ Unexpected error while loading data: {e}")
-    return None
-
+        return None
 
 def preprocess_data(df):
     """
     Prepares data for training:
-      - Handles missing values with forward fill.
-      - Converts timestamp to Unix seconds.
-      - Splits the data into training and testing sets.
-    
+    - Handles missing values with forward fill.
+    - Converts timestamp to Unix format.
+    - Splits the data into training and testing sets.
+
     Args:
         df (DataFrame): Merged DataFrame with market data.
-    
+
     Returns:
-        tuple: (X_train, X_test, y_train, y_test) split from the data.
+        tuple: (X_train, X_test, y_train, y_test)
     """
-    # Forward fill missing values
-    df.fillna(method="ffill", inplace=True)
+    if df is None or df.empty:
+        logging.error("❌ DataFrame is empty or None.")
+        return None, None, None, None
+
+    # Forward fill missing values and fix data type warnings
+    df.ffill(inplace=True)
+    df = df.infer_objects(copy=False)
 
     # Convert timestamp to Unix timestamp (seconds)
+    df["timestamp"] = pd.to_datetime(df["timestamp"])
     df["timestamp"] = df["timestamp"].astype("int64") // 10**9
 
-    # Assume "price" is the target variable and drop it from features
+    # Ensure "price" column exists
     if "price" not in df.columns:
         logging.error("❌ 'price' column is missing from the dataset.")
         return None, None, None, None
 
-    X = df.drop(columns=["price"])
+    # Define features and target variable
+    X = df[["timestamp", "volume_usd", "gas_price"]]  # Train on all three features
     y = df["price"]
 
     # Split data preserving time order (no shuffling)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False)
     logging.info(f"✅ Data split into {len(X_train)} training and {len(X_test)} test samples.")
+
     return X_train, X_test, y_train, y_test
 
+def train_and_evaluate(X_train, X_test, y_train, y_test):
+    """
+    Trains a machine learning model and evaluates it.
 
-def train_and_save_model(X_train, y_train):
-    """
-    Trains an XGBoost regressor on the provided training data and saves the model.
-    
     Args:
-        X_train (DataFrame): Training features.
-        y_train (Series): Target variable.
-    
+        X_train, X_test, y_train, y_test: Training and testing datasets.
+
     Returns:
-        model: The trained XGBoost model.
+        model: Trained model.
     """
-    try:
-        model = xgb.XGBRegressor(
-            n_estimators=200,
-            learning_rate=0.05,
-            max_depth=5,
-            objective="reg:squarederror",
-            random_state=42
-        )
-        model.fit(X_train, y_train)
+    if any(v is None for v in [X_train, X_test, y_train, y_test]):
+        logging.error("❌ Training aborted due to missing data.")
+        return None
+
+    # Initialize and train the model
+    model = RandomForestRegressor(n_estimators=100, random_state=42)
+    model.fit(X_train, y_train)
+
+    # Make predictions
+    y_pred = model.predict(X_test)
+
+    # Evaluate model performance
+    mae = mean_absolute_error(y_test, y_pred)
+    mse = mean_squared_error(y_test, y_pred)
+    rmse = np.sqrt(mse)
+
+    logging.info(f"✅ Model trained and saved at {MODEL_PATH}")
+    logging.info(f"📊 Model Evaluation Metrics:")
+    logging.info(f"🔹 MAE: {mae:.4f}")
+    logging.info(f"🔹 MSE: {mse:.4f}")
+    logging.info(f"🔹 RMSE: {rmse:.4f}")
+
+    return model
+
+def save_model(model):
+    """
+    Saves the trained model to a file.
+
+    Args:
+        model: Trained machine learning model.
+    """
+    if model:
         joblib.dump(model, MODEL_PATH)
-        logging.info(f"✅ Model trained and saved at {MODEL_PATH}")
-        return model
-    except Exception as e:
-        logging.error(f"❌ Error during model training: {e}")
-    return None
-
-
-def evaluate_model(model, X_test, y_test):
-    """
-    Evaluates the trained model on test data and logs MAE, MSE, and RMSE.
-    
-    Args:
-        model: The trained model.
-        X_test (DataFrame): Test features.
-        y_test (Series): Test target variable.
-    
-    Returns:
-        tuple: (mae, mse, rmse)
-    """
-    try:
-        y_pred = model.predict(X_test)
-        mae = mean_absolute_error(y_test, y_pred)
-        mse = mean_squared_error(y_test, y_pred)
-        rmse = np.sqrt(mse)
-    
-        logging.info("📊 Model Evaluation Metrics:")
-        logging.info(f"🔹 MAE: {mae:.4f}")
-        logging.info(f"🔹 MSE: {mse:.4f}")
-        logging.info(f"🔹 RMSE: {rmse:.4f}")
-        return mae, mse, rmse
-    except Exception as e:
-        logging.error(f"❌ Error during model evaluation: {e}")
-    return None, None, None
-
+        logging.info(f"✅ Model successfully saved to {MODEL_PATH}")
+    else:
+        logging.error("❌ No model to save.")
 
 if __name__ == "__main__":
     logging.info("🚀 Starting ETH Market Forecast Model Training...")
 
-    # Load data from the database
+    # Load and preprocess data
     data = load_data()
-    if data is None:
-        logging.error("❌ No data available for training.")
-        exit(1)
-
-    # Preprocess data
     X_train, X_test, y_train, y_test = preprocess_data(data)
-    if X_train is None:
-        logging.error("❌ Preprocessing failed.")
-        exit(1)
 
-    # Train model and save
-    model = train_and_save_model(X_train, y_train)
-    if model is None:
-        logging.error("❌ Model training failed.")
-        exit(1)
+    # Train and evaluate the model
+    model = train_and_evaluate(X_train, X_test, y_train, y_test)
 
-    # Evaluate model performance
-    evaluate_model(model, X_test, y_test)
+    # Save the model if training was successful
+    save_model(model)

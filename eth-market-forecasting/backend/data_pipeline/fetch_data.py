@@ -70,19 +70,24 @@ def fetch_gas_price():
 def fetch_tvl():
     """
     Fetches the latest DeFi Total Value Locked (TVL) for Ethereum from the DeFiLlama API.
-    
     :return: TVL in USD or None if the request fails.
     """
     url = "https://api.llama.fi/tvl/ethereum"
     try:
         response = requests.get(url, timeout=10)
         response.raise_for_status()
+        
+        # Debugging: Print response before parsing
+        print("🔍 Raw TVL API Response:", response.text)
+
         data = response.json()
+        
         tvl = data.get("tvl")
         if tvl is not None:
             logging.info("✅ TVL data fetched successfully.")
         else:
             logging.warning("⚠ TVL data missing in API response.")
+        
         return tvl
     except requests.exceptions.RequestException as e:
         logging.error(f"❌ DeFiLlama API request failed: {e}")
