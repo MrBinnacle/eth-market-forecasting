@@ -1,16 +1,15 @@
-from flask import Flask, render_template
-import dash
-import dash_core_components as dcc
-import dash_html_components as html
 import logging
-
+from flask import Flask
+import dash
+from dash import dcc, html  # Updated for Dash v2+
+  
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-# Initialize Flask app
+# Initialize the Flask server
 server = Flask(__name__)
 
-# Initialize Dash app inside Flask
+# Initialize the Dash app integrated with Flask
 app = dash.Dash(
     __name__,
     server=server,
@@ -18,14 +17,23 @@ app = dash.Dash(
     suppress_callback_exceptions=True
 )
 
-# Dash App Layout
-app.layout = html.Div([
-    html.H1("📈 Ethereum Market Forecasting Dashboard", style={'textAlign': 'center'}),
-    html.Div("Navigate to /dashboard/ to view the live ETH forecasting dashboard.", style={'textAlign': 'center'}),
-    dcc.Link("Go to Dashboard", href="/dashboard/", style={'display': 'block', 'textAlign': 'center', 'marginTop': '20px'})
-])
+# Define the Dash app layout
+app.layout = html.Div(
+    children=[
+        html.H1("📈 Ethereum Market Forecasting Dashboard", style={'textAlign': 'center'}),
+        html.Div(
+            "Navigate to /dashboard/ to view the live ETH forecasting dashboard.",
+            style={'textAlign': 'center'}
+        ),
+        dcc.Link(
+            "Go to Dashboard",
+            href="/dashboard/",
+            style={'display': 'block', 'textAlign': 'center', 'marginTop': '20px'}
+        )
+    ]
+)
 
-# Flask Route for Homepage
+# Define the Flask route for the homepage
 @server.route("/")
 def home():
     return """
@@ -33,7 +41,7 @@ def home():
     <p>Navigate to <a href='/dashboard/'>Dashboard</a> to view real-time ETH predictions.</p>
     """
 
-# Run Flask Server
+# Run the server
 if __name__ == "__main__":
     logging.info("🚀 Starting Flask & Dash Server...")
     server.run(debug=True, host="0.0.0.0", port=8050)

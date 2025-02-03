@@ -1,13 +1,14 @@
 import os
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
+# Load environment variables from the .env file
 load_dotenv()
 
-ETHERSCAN_API_KEY = os.getenv("ETHERSCAN_API_KEY")
-DUNE_API_KEY = os.getenv("DUNE_API_KEY")
+# API Keys
+ETHERSCAN_API_KEY = os.getenv("ETHERSCAN_API_KEY", "")
+DUNE_API_KEY = os.getenv("DUNE_API_KEY", "")
 
-# Application configuration settings
-DEBUG = True
-DASHBOARD_UPDATE_INTERVAL = 60000  # in milliseconds
-API_TIMEOUT = 10  # seconds
+# Application Configuration Settings
+DEBUG = os.getenv("DEBUG", "True").lower() in ("true", "1", "yes")
+DASHBOARD_UPDATE_INTERVAL = int(os.getenv("DASHBOARD_UPDATE_INTERVAL", 60000))  # in milliseconds
+API_TIMEOUT = int(os.getenv("API_TIMEOUT", 10))  # seconds

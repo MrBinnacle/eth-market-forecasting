@@ -16,10 +16,12 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 MODEL_PATH = "backend/ai_model/eth_forecast_model.pkl"
 DB_PATH = "backend/data_pipeline/market_data.db"
 
-# Load the trained model
 def load_model():
     """
     Loads the trained machine learning model for ETH price forecasting.
+    
+    Returns:
+        model: Trained model object if successful, else None.
     """
     try:
         model = joblib.load(MODEL_PATH)
@@ -27,64 +29,76 @@ def load_model():
         return model
     except FileNotFoundError:
         logging.error(f"❌ Model file not found at {MODEL_PATH}")
-        return None
+    except Exception as e:
+        logging.error(f"❌ Error loading model: {e}")
+    return None
 
-# Fetch latest real-time features from SQLite
+# Cache the model at module level for efficiency.
+MODEL = load_model()
+
 def fetch_latest_data():
     """
-    Fetches the latest available market share, ETH price, and gas price data from the database.
+    Fetches the latest available market data from the SQLite database.
+    Specifically retrieves the most recent ETH price, market share volume, and gas price (average).
+    
+    Returns:
+        np.ndarray: A 2D NumPy array with shape (1, 3) containing the features, or None if any data is missing.
     """
     try:
-        conn = sqlite3.connect(DB_PATH)
-
-        # Load the most recent ETH price
-        eth_price = pd.read_sql_query("SELECT * FROM eth_price ORDER BY timestamp DESC LIMIT 1", conn)
-
-        # Load the most recent market share data
-        market_share = pd.read_sql_query("SELECT * FROM market_share ORDER BY timestamp DESC LIMIT 1", conn)
-
-        # Load the most recent gas price data
-        gas_price = pd.read_sql_query("SELECT * FROM gas_price ORDER BY timestamp DESC LIMIT 1", conn)
-
-        conn.close()
-
-        if eth_price.empty or market_share.empty or gas_price.empty:
+        with sqlite3.connect(DB_PATH) as conn:
+            # Retrieve the most recent ETH price
+            eth_price_df = pd.read_sql_query("SELECT price FROM eth_price ORDER BY timestamp DESC LIMIT 1", conn)
+            # Retrieve the most recent market share data
+            market_share_df = pd.read_sql_query("SELECT volume_usd FROM market_share ORDER BY timestamp DESC LIMIT 1", conn)
+            # Retrieve the most recent gas price data
+            gas_price_df = pd.read_sql_query("SELECT average FROM gas_price ORDER BY timestamp DESC LIMIT 1", conn)
+        
+        if eth_price_df.empty or market_share_df.empty or gas_price_df.empty:
             logging.warning("⚠ Missing data for prediction.")
             return None
 
-        # Extract relevant values
-        latest_eth_price = eth_price["price"].values[0]
-        latest_market_volume = market_share["volume_usd"].values[0]
-        latest_gas_price = gas_price["average"].values[0]
+        latest_eth_price = eth_price_df["price"].iloc[0]
+        latest_market_volume = market_share_df["volume_usd"].iloc[0]
+        latest_gas_price = gas_price_df["average"].iloc[0]
 
+        logging.info("✅ Latest feature data retrieved successfully.")
         return np.array([[latest_eth_price, latest_market_volume, latest_gas_price]])
 
     except sqlite3.Error as e:
         logging.error(f"❌ Database error: {e}")
-        return None
+    except Exception as e:
+        logging.error(f"❌ Unexpected error while fetching data: {e}")
+    return None
 
-# Predict ETH price using real-time features
 def predict_eth_price():
     """
-    Predicts ETH price using the trained model and latest market data.
+    Predicts the Ethereum (ETH) price using the trained model and the latest market data.
+    
+    Returns:
+        float: The predicted ETH price, or None if prediction fails.
     """
-    model = load_model()
-    if model is None:
-        logging.error("❌ Prediction failed: No model loaded.")
+    if MODEL is None:
+        logging.error("❌ Prediction failed: Model is not loaded.")
         return None
 
     latest_features = fetch_latest_data()
     if latest_features is None:
-        logging.error("❌ Prediction failed: No valid input data.")
+        logging.error("❌ Prediction failed: Valid input data is missing.")
         return None
 
-    prediction = model.predict(latest_features)
-    return prediction[0]
+    try:
+        prediction = MODEL.predict(latest_features)
+        predicted_value = float(prediction[0])
+        logging.info(f"✅ Prediction successful: ${predicted_value:.2f}")
+        return predicted_value
+    except Exception as e:
+        logging.error(f"❌ Error during prediction: {e}")
+    return None
 
 if __name__ == "__main__":
     logging.info("🚀 Running ETH Price Prediction...")
     predicted_price = predict_eth_price()
-
+    
     if predicted_price is not None:
         print(f"📈 Predicted ETH Price: ${predicted_price:.2f}")
     else:

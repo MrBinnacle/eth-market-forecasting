@@ -15,15 +15,14 @@ ETHERSCAN_API_KEY = os.getenv("ETHERSCAN_API_KEY")
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-# Database path
+# Define paths
 DB_PATH = "backend/data_pipeline/market_data.db"
 JSON_PATH = "backend/data_pipeline/market_share_data.json"
 
 
-### 📌 1️⃣ Fetch Market Share Data from Dune API
 def fetch_market_share(market="dex", chain="ethereum"):
     """
-    Fetches DEX or NFT market share data from Dune API.
+    Fetches DEX or NFT market share data from the Dune API.
     
     :param market: "dex" for DEXs or "nft" for NFT marketplaces.
     :param chain: Blockchain name (e.g., ethereum, polygon, bnb).
@@ -35,43 +34,26 @@ def fetch_market_share(market="dex", chain="ethereum"):
     try:
         response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
+        logging.info("✅ Market share data fetched successfully.")
         return response.json()
     except requests.exceptions.RequestException as e:
         logging.error(f"❌ Dune API request failed: {e}")
         return None
 
 
-### 📌 2️⃣ Fetch ETH Price from CoinGecko
-def fetch_eth_price():
-    """
-    Fetches the latest Ethereum price from CoinGecko.
-    :return: ETH price in USD or None if the request fails.
-    """
-    url = "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
-
-    try:
-        response = requests.get(url, timeout=10)
-        response.raise_for_status()
-        data = response.json()
-        return data.get("ethereum", {}).get("usd")
-    except requests.exceptions.RequestException as e:
-        logging.error(f"❌ CoinGecko API request failed: {e}")
-        return None
-
-
-### 📌 3️⃣ Fetch Ethereum Gas Price from Etherscan
 def fetch_gas_price():
     """
-    Fetches the latest Ethereum gas price from Etherscan.
-    :return: Gas price data as a dictionary or None if the request fails.
+    Fetches the latest Ethereum gas price from the Etherscan API.
+    
+    :return: Dictionary containing gas price data or None if the request fails.
     """
     url = f"https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey={ETHERSCAN_API_KEY}"
-
     try:
         response = requests.get(url, timeout=10)
         response.raise_for_status()
         data = response.json()
         if data.get("status") == "1":
+            logging.info("✅ Gas price data fetched successfully.")
             return {
                 "low": data["result"]["SafeGasPrice"],
                 "average": data["result"]["ProposeGasPrice"],
@@ -85,7 +67,28 @@ def fetch_gas_price():
         return None
 
 
-### 📌 4️⃣ Save Data to JSON File
+def fetch_tvl():
+    """
+    Fetches the latest DeFi Total Value Locked (TVL) for Ethereum from the DeFiLlama API.
+    
+    :return: TVL in USD or None if the request fails.
+    """
+    url = "https://api.llama.fi/tvl/ethereum"
+    try:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        tvl = data.get("tvl")
+        if tvl is not None:
+            logging.info("✅ TVL data fetched successfully.")
+        else:
+            logging.warning("⚠ TVL data missing in API response.")
+        return tvl
+    except requests.exceptions.RequestException as e:
+        logging.error(f"❌ DeFiLlama API request failed: {e}")
+        return None
+
+
 def save_to_json(data, file_path=JSON_PATH):
     """
     Saves market data to a JSON file.
@@ -101,19 +104,13 @@ def save_to_json(data, file_path=JSON_PATH):
         logging.error(f"❌ Failed to save JSON data: {e}")
 
 
-### 📌 5️⃣ Store Data in SQLite Database
-def store_market_data(market_data, gas_price):
+def create_tables(cursor):
     """
-    Stores market share, ETH price, and gas price data in an SQLite database.
-
-    :param market_data: Market share data fetched from Dune API.
-    :param gas_price: Gas price data fetched from Etherscan API.
+    Creates necessary tables in the SQLite database if they do not exist.
+    
+    :param cursor: SQLite cursor object.
     """
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-
-    # Create tables if they don't exist
-    cursor.execute("""
+    cursor.executescript("""
         CREATE TABLE IF NOT EXISTS market_share (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             timestamp TEXT,
@@ -123,69 +120,87 @@ def store_market_data(market_data, gas_price):
             version TEXT,
             volume_usd REAL,
             trades INTEGER
-        )
-    """)
-
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS eth_price (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            timestamp TEXT,
-            price REAL
-        )
-    """)
-
-    cursor.execute("""
+        );
         CREATE TABLE IF NOT EXISTS gas_price (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             timestamp TEXT,
             low REAL,
             average REAL,
             high REAL
-        )
+        );
+        CREATE TABLE IF NOT EXISTS tvl (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp TEXT,
+            tvl REAL
+        );
     """)
 
-    # Insert ETH price data
-    eth_price = fetch_eth_price()
-    if eth_price:
-        cursor.execute("INSERT INTO eth_price (timestamp, price) VALUES (?, ?)", 
-                       (datetime.now(), eth_price))
-        logging.info("✅ ETH price data stored successfully.")
-    else:
-        logging.warning("⚠ ETH price data could not be retrieved.")
 
-    # Insert Gas Price Data
-    if gas_price:
-        cursor.execute("INSERT INTO gas_price (timestamp, low, average, high) VALUES (?, ?, ?, ?)", 
-                       (datetime.now(), gas_price["low"], gas_price["average"], gas_price["high"]))
-        logging.info("✅ Gas price data stored successfully.")
-    else:
-        logging.warning("⚠ Gas price data could not be retrieved.")
+def store_market_data(market_data, gas_price, tvl):
+    """
+    Stores market share, TVL, and gas price data in an SQLite database.
+    
+    :param market_data: Market share data fetched from the Dune API.
+    :param gas_price: Gas price data fetched from the Etherscan API.
+    :param tvl: Total Value Locked (TVL) fetched from the DeFiLlama API.
+    """
+    try:
+        with sqlite3.connect(DB_PATH) as conn:
+            cursor = conn.cursor()
+            create_tables(cursor)
+            timestamp = datetime.now().isoformat()
 
-    # Insert market share data
-    if "result" in market_data and "rows" in market_data["result"]:
-        rows = market_data["result"]["rows"]
-        batch_data = [
-            (
-                datetime.now(),
-                row.get("market"),
-                row.get("blockchain"),
-                row.get("project"),
-                row.get("version"),
-                row.get("volume_usd"),
-                row.get("trades")
-            )
-            for row in rows
-        ]
+            # Insert Gas Price Data
+            if gas_price:
+                cursor.execute("""
+                    INSERT INTO gas_price (timestamp, low, average, high)
+                    VALUES (?, ?, ?, ?)
+                """, (timestamp, gas_price["low"], gas_price["average"], gas_price["high"]))
+                logging.info("✅ Gas price data stored successfully.")
+            else:
+                logging.warning("⚠ Gas price data could not be retrieved.")
 
-        cursor.executemany("""
-            INSERT INTO market_share (timestamp, market, blockchain, project, version, volume_usd, trades)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, batch_data)
+            # Insert TVL Data
+            if tvl:
+                cursor.execute("""
+                    INSERT INTO tvl (timestamp, tvl)
+                    VALUES (?, ?)
+                """, (timestamp, tvl))
+                logging.info("✅ TVL data stored successfully.")
+            else:
+                logging.warning("⚠ TVL data could not be retrieved.")
 
-        logging.info(f"✅ Stored {len(batch_data)} market share records.")
+            # Insert Market Share Data
+            if market_data and "result" in market_data and "rows" in market_data["result"]:
+                rows = market_data["result"]["rows"]
+                batch_data = [
+                    (
+                        timestamp,
+                        row.get("market"),
+                        row.get("blockchain"),
+                        row.get("project"),
+                        row.get("version"),
+                        row.get("volume_usd"),
+                        row.get("trades")
+                    )
+                    for row in rows
+                ]
+                if batch_data:
+                    cursor.executemany("""
+                        INSERT INTO market_share (timestamp, market, blockchain, project, version, volume_usd, trades)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """, batch_data)
+                    logging.info(f"✅ Stored {len(batch_data)} market share records.")
+                else:
+                    logging.warning("⚠ No valid market share data to insert.")
+            else:
+                logging.warning("⚠ Market share data structure is invalid or empty.")
 
-    conn.commit()
-    conn.close()
+            conn.commit()
+    except sqlite3.Error as e:
+        logging.error(f"❌ Database error: {e}")
+    except Exception as e:
+        logging.error(f"❌ Unexpected error: {e}")
 
 
 if __name__ == "__main__":
@@ -195,8 +210,11 @@ if __name__ == "__main__":
     logging.info("⛽ Fetching Ethereum gas price data...")
     gas_price_data = fetch_gas_price()
 
+    logging.info("💰 Fetching Ethereum TVL data...")
+    tvl_data = fetch_tvl()
+
     if market_data:
         save_to_json(market_data)
-        store_market_data(market_data, gas_price_data)
+        store_market_data(market_data, gas_price_data, tvl_data)
     else:
         logging.error("❌ Failed to fetch market share data.")
