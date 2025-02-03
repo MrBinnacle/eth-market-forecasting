@@ -3,6 +3,13 @@
         "executemany",
         "executescript",
         "iloc",
-        "levelname"
+        "joblib",
+        "levelname",
+        "lightgbm",
+        "numpy",
+        "scikit",
+        "xaxis",
+        "xgboost",
+        "yaxis"
     ]
 }

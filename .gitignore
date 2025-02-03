@@ -1,21 +1,31 @@
-.env
-__pycache__/
-venv/
-*.log
-*.db
-eth_forecast_model.pkl
 # Ignore virtual environment
 venv/
+
+# Ignore compiled Python files & cache
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 
 # Ignore environment variables & API keys
 .env
 
-# Ignore data files and logs
-backend/data_pipeline/market_data.db
+# Ignore logs & temporary files
 logs/
+*.log
 
-# Ignore compiled & cache files
+# Ignore database files
+*.db
+backend/data_pipeline/market_data.db
+
+# Ignore ML model files
 *.pkl
 *.joblib
+eth_forecast_model.pkl
+
+# Ignore Jupyter Notebook checkpoints (if using Jupyter)
+.ipynb_checkpoints/
+
+# Ignore macOS & Windows system files (just in case)
+.DS_Store
+Thumbs.db
