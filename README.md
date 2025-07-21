@@ -4,7 +4,7 @@ This version aligns with all **refactored code** and **enhanced features**.
 ---
 
 # **Ethereum Market Forecasting System**
-This project provides a **production-ready system** for **real-time forecasting** of Ethereum (ETH) market movements. It integrates:
+This project provides a **production-ready system** for **real-time forecasting of Ethereum (ETH) market movements.** It integrates:
 
 ✅ **A real-time data pipeline** → Fetches ETH market, DEX/NFT market share, gas fees, and on-chain transaction data.  
 ✅ **An AI-powered predictive model** → Uses **XGBoost** for high-accuracy ETH price forecasting.  
