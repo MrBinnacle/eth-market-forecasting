@@ -1,0 +1,11 @@
+{
+  "name": "eth-market-forecasting",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
+  },
+  "homepage": "https://MrBinnacle.github.io/eth-market-forecasting"
+}
