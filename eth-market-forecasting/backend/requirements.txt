@@ -10,6 +10,7 @@ dash==2.9.0
 dash-core-components==2.0.0
 dash-html-components==2.0.0
 flask==2.2.2
+flask-cors
 
 # Database & Environment Handling
 python-dotenv
