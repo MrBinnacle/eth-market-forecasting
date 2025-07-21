@@ -65,9 +65,13 @@ docker run -p 8050:8050 --env-file .env eth-market-forecasting
 
 ### **5️⃣ Live Dashboard**
 - **Real-time ETH price predictions** visualized with Dash & Plotly.
-- **Access the dashboard at:**  
+- **Access the dashboard at:**
   ```
   http://localhost:8050/dashboard/
+  ```
+- **View the sample portfolio dashboard at:**
+  ```
+  http://localhost:8050/portfolio
   ```
 
 ---

@@ -1,5 +1,5 @@
 import logging
-from flask import Flask
+from flask import Flask, render_template
 import dash
 from dash import dcc, html  # Updated for Dash v2+
   
@@ -39,7 +39,13 @@ def home():
     return """
     <h1>Welcome to Ethereum Market Forecasting</h1>
     <p>Navigate to <a href='/dashboard/'>Dashboard</a> to view real-time ETH predictions.</p>
+    <p>View the <a href='/portfolio'>Sample Portfolio Dashboard</a> for a learning-mode example.</p>
     """
+
+# Serve the sample portfolio dashboard
+@server.route("/portfolio")
+def portfolio_dashboard():
+    return render_template("portfolio.html")
 
 # Run the server
 if __name__ == "__main__":
