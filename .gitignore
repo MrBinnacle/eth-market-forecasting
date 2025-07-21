@@ -29,3 +29,8 @@ eth_forecast_model.pkl
 # Ignore macOS & Windows system files (just in case)
 .DS_Store
 Thumbs.db
+
+# Node modules
+node_modules/
+# Build output
+dist/
