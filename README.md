@@ -7,7 +7,7 @@ This version aligns with all **refactored code** and **enhanced features**.
 This project provides a **production-ready system** for **real-time forecasting** of Ethereum (ETH) market movements. It integrates:
 
 ✅ **A real-time data pipeline** → Fetches ETH market, DEX/NFT market share, gas fees, and on-chain transaction data.  
-✅ **An AI-powered predictive model** → Uses **XGBoost** for high-accuracy ETH price forecasting.  
+✅ **An AI-powered predictive model** → Uses **RandomForest** for reliable ETH price forecasting.
 ✅ **A live dashboard** → Built with **Dash & Plotly** for visualizing trends and predictions.  
 ✅ **Automated processes** → Handles **data ingestion, model training, and real-time predictions.**  
 
@@ -21,7 +21,7 @@ eth-market-forecasting/
 │   │   ├── fetch_data.py   # Fetches market, ETH price, and gas fee data
 │   │   ├── database.py     # Stores and manages structured data in SQLite
 │   ├── ai_model/
-│   │   ├── train_model.py  # AI training using XGBoost
+│   │   ├── train_model.py  # AI training using RandomForest
 │   │   ├── predict.py      # Generates real-time ETH price predictions
 │   ├── requirements.txt    # Python dependencies
 ├── frontend/
@@ -60,7 +60,7 @@ docker run -p 8050:8050 --env-file .env eth-market-forecasting
 
 ### **4️⃣ AI Model**
 - The **ETH price forecasting model** is trained using **`train_model.py`**.
-- **XGBoost-based model** for fast and high-accuracy price forecasting.
+- **RandomForest-based model** for reliable price forecasting.
 - The model updates automatically when new data is available.
 
 ### **5️⃣ Live Dashboard**
@@ -75,7 +75,7 @@ docker run -p 8050:8050 --env-file .env eth-market-forecasting
 ## **🔹 Key Features**
 ✅ **Live ETH Market Forecasting**  
 ✅ **Real-time ETH price, gas fees, & market share tracking**  
-✅ **AI-powered predictive modeling using XGBoost**  
+✅ **AI-powered predictive modeling using RandomForest**
 ✅ **Automated data ingestion & model retraining**  
 ✅ **Interactive dashboard with real-time updates**  
 
@@ -83,6 +83,7 @@ docker run -p 8050:8050 --env-file .env eth-market-forecasting
 
 ## **🔹 Notes & Future Enhancements**
 - ✅ **Replace placeholder API endpoints** (staking & TVL data) with live APIs.  
-- ✅ **Expand AI model** → Integrate **LSTM or Hugging Face Transformers** for deeper analysis.  
-- ✅ **Enhance Dashboard UI** → Add **multi-graph views & advanced analytics**.  
+- ✅ **Expand AI model** → Integrate **LSTM or Hugging Face Transformers** for deeper analysis.
+- 🔄 **Explore XGBoost** → Evaluate XGBoost for potential future model improvements.
+- ✅ **Enhance Dashboard UI** → Add **multi-graph views & advanced analytics**.
 - ✅ **Deploy in Production** → Use **Gunicorn + Nginx** for scalable hosting.  
