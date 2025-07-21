@@ -91,4 +91,7 @@ def predict_eth_price():
 if __name__ == "__main__":
     logging.info("🚀 Running ETH Price Prediction...")
     predicted_price = predict_eth_price()
-    print(f"📈 Predicted ETH Price: ${predicted_price:.2f}" if predicted_price else "❌ Failed to generate prediction.")
+    if predicted_price is not None:
+        print(f"📈 Predicted ETH Price: ${predicted_price:.2f}")
+    else:
+        print("❌ Failed to generate prediction.")
