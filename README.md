@@ -1,93 +1,26 @@
-### **🚀 Updated & Optimized `README.md`**
-This version aligns with all **refactored code** and **enhanced features**.
+# ETH Market Forecasting Dashboard
 
----
+This is a dark-themed interactive ETH portfolio learning dashboard built with React and deployed on GitHub Pages.
 
-# **Ethereum Market Forecasting System**
-This project provides a **production-ready system** for **real-time forecasting of Ethereum (ETH) market movements.** It integrates:
+🔗 Live Site: https://MrBinnacle.github.io/eth-market-forecasting
 
-✅ **A real-time data pipeline** → Fetches ETH market, DEX/NFT market share, gas fees, and on-chain transaction data.  
-✅ **An AI-powered predictive model** → Uses **RandomForest** for reliable ETH price forecasting.
-✅ **A live dashboard** → Built with **Dash & Plotly** for visualizing trends and predictions.  
-✅ **Automated processes** → Handles **data ingestion, model training, and real-time predictions.**  
+## 📦 Tech Stack
+- React + Vite
+- GitHub Pages Deployment
+- Custom CSS UI Dashboard
 
----
+## 🧠 Features
+- Dashboard visualization for ETH and crypto positions
+- Emergency fund alert and learning plan system
+- Decision framework for action planning
 
-## **📁 Project Structure**
+## 🚀 Run Locally
 ```
-eth-market-forecasting/
-├── backend/
-│   ├── data_pipeline/
-│   │   ├── fetch_data.py   # Fetches market, ETH price, and gas fee data
-│   │   ├── database.py     # Stores and manages structured data in SQLite
-│   ├── ai_model/
-│   │   ├── train_model.py  # AI training using RandomForest
-│   │   ├── predict.py      # Generates real-time ETH price predictions
-│   ├── requirements.txt    # Python dependencies
-├── frontend/
-│   ├── app.py              # Flask integration for hosting Dash
-│   ├── dashboard.py        # Dash-based live ETH forecasting dashboard
-│   ├── config.py           # App configuration settings
-├── Dockerfile              # Containerized deployment setup
-├── README.md               # Project documentation
-├── run.sh                  # Shell script to start the full system
+npm install
+npm run dev
 ```
 
----
-
-## **🚀 Setup & Deployment**
-### **1️⃣ Local Setup**
-```sh
-# Install Python 3.9+ dependencies
-pip install -r backend/requirements.txt
-
-# Run the full system
-sh run.sh
+## 🧪 Run Tests
 ```
-
-### **2️⃣ Containerized Deployment**
-```sh
-# Build the Docker image
-docker build -t eth-market-forecasting .
-
-# Run the container
-docker run -p 8050:8050 --env-file .env eth-market-forecasting
+npm run test
 ```
-
-### **3️⃣ Data Pipeline & Scheduling**
-- The **data pipeline** is initiated via **`fetch_data.py`**.  
-- For production, integrate with a scheduler (**cron jobs, Apache Airflow, etc.**).  
-
-### **4️⃣ AI Model**
-- The **ETH price forecasting model** is trained using **`train_model.py`**.
-- **RandomForest-based model** for reliable price forecasting.
-- The model updates automatically when new data is available.
-
-### **5️⃣ Live Dashboard**
-- **Real-time ETH price predictions** visualized with Dash & Plotly.
-- **Access the dashboard at:**
-  ```
-  http://localhost:8050/dashboard/
-  ```
-- **View the sample portfolio dashboard at:**
-  ```
-  http://localhost:8050/portfolio
-  ```
-
----
-
-## **🔹 Key Features**
-✅ **Live ETH Market Forecasting**  
-✅ **Real-time ETH price, gas fees, & market share tracking**  
-✅ **AI-powered predictive modeling using RandomForest**
-✅ **Automated data ingestion & model retraining**  
-✅ **Interactive dashboard with real-time updates**  
-
----
-
-## **🔹 Notes & Future Enhancements**
-- ✅ **Replace placeholder API endpoints** (staking & TVL data) with live APIs.  
-- ✅ **Expand AI model** → Integrate **LSTM or Hugging Face Transformers** for deeper analysis.
-- 🔄 **Explore XGBoost** → Evaluate XGBoost for potential future model improvements.
-- ✅ **Enhance Dashboard UI** → Add **multi-graph views & advanced analytics**.
-- ✅ **Deploy in Production** → Use **Gunicorn + Nginx** for scalable hosting.  
