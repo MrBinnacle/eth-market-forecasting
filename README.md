@@ -101,7 +101,6 @@ The Flask API exposes two simple endpoints once the server is running:
   ```
 
 - **Security Scan** (Snyk)
-- **Security Scan** (Snyk)
 
   ```bash
   npx snyk test

@@ -16,9 +16,9 @@ $files = @(
     "backend/requirements.txt",
     "backend/dashboard/app.py",
     "backend/dashboard/config.py",
-    "Dockerfile",
+    "backend/Dockerfile",
     "README.md",
-    "run.ps1"
+    "backend/run.ps1"
 )
 
 # Create directories
