@@ -1,6 +1,7 @@
 import dash
 from dash import dcc, html
 from dash.dependencies import Input, Output
+from .config import DEBUG
 import plotly.graph_objs as go
 import logging
 from backend.ai_model.predict import predict_eth_price
@@ -65,4 +66,4 @@ def update_graph(n):
     return figure, f"📊 Predicted ETH Price: ${predicted_price:.2f}"
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=DEBUG)

@@ -2,6 +2,7 @@ import logging
 from flask import Flask, render_template
 import dash
 from dash import dcc, html  # Updated for Dash v2+
+from .config import DEBUG
   
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -50,4 +51,4 @@ def portfolio_dashboard():
 # Run the server
 if __name__ == "__main__":
     logging.info("🚀 Starting Flask & Dash Server...")
-    server.run(debug=True, host="0.0.0.0", port=8050)
+    server.run(debug=DEBUG, host="0.0.0.0", port=8050)
