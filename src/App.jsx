@@ -1,5 +1,5 @@
 import React from 'react';
-import ETHForecastingDashboard from '../ETH_Dashboard_demo';
+import ETHForecastingDashboard from './components/ETHDashboard';
 
 function App() {
   return <ETHForecastingDashboard />;
