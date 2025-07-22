@@ -7,5 +7,8 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
   },
-  "homepage": "https://MrBinnacle.github.io/eth-market-forecasting"
+  "homepage": "https://MrBinnacle.github.io/eth-market-forecasting",
+  "devDependencies": {
+    "gh-pages": "^5.0.0"
+  }
 }
