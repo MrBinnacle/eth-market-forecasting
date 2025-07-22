@@ -1,8 +1,8 @@
 import React from 'react';
-import ETHForecastingDashboard from './components/ETHDashboard';
+import ETHDashboard from './components/ETHDashboard';
 
 function App() {
-  return <ETHForecastingDashboard />;
+  return <ETHDashboard />;
 }
 
 export default App;
