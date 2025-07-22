@@ -13,4 +13,4 @@ python backend/ai_model/train_model.py
 
 # Start dashboard
 Write-Host "📊 Launching dashboard at http://localhost:8050..."
-python frontend/dashboard.py
+python backend/dashboard/app.py

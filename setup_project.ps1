@@ -1,10 +1,11 @@
-$projectRoot = "eth-market-forecasting"
+$projectRoot = "."
 
 # Define project structure
 $folders = @(
     "backend/data_pipeline",
     "backend/ai_model",
-    "frontend"
+    "frontend",
+    "backend/dashboard"
 )
 
 $files = @(
@@ -13,8 +14,8 @@ $files = @(
     "backend/ai_model/train_model.py",
     "backend/ai_model/predict.py",
     "backend/requirements.txt",
-    "frontend/dashboard.py",
-    "frontend/config.py",
+    "backend/dashboard/app.py",
+    "backend/dashboard/config.py",
     "Dockerfile",
     "README.md",
     "run.ps1"

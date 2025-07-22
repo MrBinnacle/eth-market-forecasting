@@ -1,3 +1,5 @@
+"""Prediction helper for ETH price forecasting."""
+
 import os
 import joblib
 import numpy as np

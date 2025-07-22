@@ -14,4 +14,4 @@ COPY . .
 EXPOSE 8050
 
 # Command to run the dashboard (can be adjusted to run the entire pipeline)
-CMD ["python", "frontend/dashboard.py"]
+CMD ["python", "backend/dashboard/app.py"]

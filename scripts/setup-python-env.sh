@@ -12,9 +12,9 @@ fi
 echo "⚙️ Activating virtual environment..."
 source .venv/bin/activate
 
-if [ -f "requirements.txt" ]; then
-  echo "📦 Installing Python dependencies from requirements.txt..."
-  pip install -r requirements.txt
+if [ -f "backend/requirements.txt" ]; then
+  echo "📦 Installing Python dependencies from backend/requirements.txt..."
+  pip install -r backend/requirements.txt
 else
   echo "⚠️ No requirements.txt found. Installing pytest manually..."
   pip install pytest

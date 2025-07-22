@@ -1,3 +1,5 @@
+"""Flask API for providing ETH price predictions and market data."""
+
 from flask import Flask, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
@@ -17,7 +19,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 
 # Define paths
 MODEL_PATH = "backend/ai_model/eth_forecast_model.pkl"
-DB_PATH = "backend/data_pipeline/market_data.db"
+DB_PATH = "backend/data_pipeline/market_data.db"  # TODO: make configurable
 
 # Initialize Flask app with CORS enabled
 app = Flask(__name__)
