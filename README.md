@@ -72,3 +72,48 @@ API_TIMEOUT=10
   npx snyk test
   ```
 
+## Local Setup
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) >= v18
+- [Python 3.7+](https://www.python.org/)
+- [npm](https://www.npmjs.com/)
+- (Optional) [Vitest VS Code extension](https://marketplace.visualstudio.com/items?itemName=ZixuanChen.vitest-explorer)
+
+---
+
+### Setup
+
+#### 1. Python Environment
+
+```bash
+source scripts/setup-python-env.sh
+```
+
+#### 2. Node + Project Dependencies
+
+```bash
+npm install
+```
+
+#### 3. Run Tests
+
+* Python:
+
+  ```bash
+  pytest -q
+  ```
+
+* JavaScript:
+
+  ```bash
+  npm run test
+  ```
+
+#### 4. Security Scan (via Snyk)
+
+```bash
+npx snyk test
+```
+
