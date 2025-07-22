@@ -3,13 +3,14 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "test": "vitest run",
+    "deploy": "gh-pages -d dist",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "build": "vite build",
+    "test": "vitest run"
   },
   "homepage": "https://MrBinnacle.github.io/eth-market-forecasting",
   "devDependencies": {
     "gh-pages": "^5.0.0",
-    "vitest": "^1.0.0"
+    "vitest": "^1.3.0"
   }
 }
