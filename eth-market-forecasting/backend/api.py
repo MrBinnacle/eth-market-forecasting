@@ -10,6 +10,7 @@ import pandas as pd
 
 # Load environment variables
 load_dotenv()
+DEBUG = os.getenv("DEBUG", "False").lower() in ("true", "1", "yes")
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -107,4 +108,4 @@ def get_latest_market_data():
 
 if __name__ == '__main__':
     logging.info("🚀 Starting AI-Powered Ethereum Price Prediction API...")
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=DEBUG)
