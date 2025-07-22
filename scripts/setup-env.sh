@@ -9,6 +9,6 @@ echo "Setting up environment..."
 ./scripts/bootstrap.sh || true
 
 # Install Python dependencies if available
-if [ -f eth-market-forecasting/backend/requirements.txt ]; then
-  pip install -r eth-market-forecasting/backend/requirements.txt || echo "⚠️ pip install failed"
+if [ -f backend/requirements.txt ]; then
+  pip install -r backend/requirements.txt || echo "⚠️ pip install failed"
 fi

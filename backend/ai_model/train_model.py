@@ -1,3 +1,5 @@
+"""Training script for the ETH price prediction model."""
+
 import sqlite3
 import pandas as pd
 import numpy as np

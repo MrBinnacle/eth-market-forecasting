@@ -1,0 +1,32 @@
+{
+  "name": "eth-market-forecasting-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "React dashboard for the ETH market forecasting project",
+  "author": "MrBinnacle",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MrBinnacle/eth-market-forecasting"
+  },
+  "scripts": {
+    "start": "vite",
+    "build": "vite build",
+    "test": "vitest run",
+    "lint": "echo 'TODO: add linter'",
+    "deploy": "gh-pages -d public",
+    "predeploy": "npm run build"
+  },
+  "homepage": "https://MrBinnacle.github.io/eth-market-forecasting",
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.0.0",
+    "gh-pages": "^5.0.0",
+    "vitest": "^1.3.0",
+    "snyk": "^1.1288.0",
+    "vite": "^4.3.9"
+  }
+}

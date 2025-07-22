@@ -19,16 +19,27 @@ jobs:
         with:
           node-version: 18
 
-      - name: Bootstrap environment
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Bootstrap Node environment
         run: bash scripts/bootstrap.sh
         continue-on-error: true  # allow failures when offline
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Install frontend dependencies
+        run: npm ci --prefix frontend
         continue-on-error: true  # fails without lockfile or registry access
 
       - name: Run Vitest tests
-        run: npm run test
+        run: npm run test --prefix frontend
+
+      - name: Install backend requirements
+        run: pip install -r backend/requirements.txt
+
+      - name: Run Pytest
+        run: pytest -q
         continue-on-error: true  # vitest missing if npm install failed
 
       - name: Run Snyk security scan
@@ -58,16 +69,16 @@ jobs:
         continue-on-error: true  # allow failures when offline
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --prefix frontend
         continue-on-error: true  # may fail without network
 
       - name: Build static site
-        run: npm run build
+        run: npm run build --prefix frontend
         continue-on-error: true  # vite may be missing
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
+          publish_dir: ./frontend/public
 

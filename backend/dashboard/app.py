@@ -1,3 +1,5 @@
+"""Flask server that hosts the Dash dashboard."""
+
 import logging
 from flask import Flask, render_template
 import dash
@@ -51,4 +53,5 @@ def portfolio_dashboard():
 # Run the server
 if __name__ == "__main__":
     logging.info("🚀 Starting Flask & Dash Server...")
+    # TODO: make host/port configurable via environment variables
     server.run(debug=DEBUG, host="0.0.0.0", port=8050)

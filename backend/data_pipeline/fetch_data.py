@@ -1,3 +1,5 @@
+"""Utilities for fetching market data and storing it locally."""
+
 import os
 import requests
 import json

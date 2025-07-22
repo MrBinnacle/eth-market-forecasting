@@ -10,6 +10,7 @@ __pycache__/
 
 # Ignore environment variables & API keys
 .env
+# Keep secrets out of version control
 
 # Ignore logs & temporary files
 logs/
@@ -33,6 +34,7 @@ Thumbs.db
 
 # Node modules
 node_modules/
-# Build output
+# Frontend build output
+frontend/dist/
 dist/
 folder_structure.txt

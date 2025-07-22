@@ -4,9 +4,10 @@
 [![Snyk](https://snyk.io/test/github/MrBinnacle/eth-market-forecasting/badge.svg)](https://snyk.io/test/github/MrBinnacle/eth-market-forecasting)
 
 This repository contains a small end‑to‑end system for forecasting the price of
-Ethereum.  Market data is fetched and stored in SQLite, a machine‐learning model
-is trained, and a simple dashboard displays predictions.  The React dashboard is
-served with Vite while the Python backend exposes a Dash/Flask interface.
+Ethereum. Market data is fetched and stored in SQLite, a machine‑learning model
+is trained, and a simple dashboard displays predictions. The React dashboard is
+served with Vite while the Python backend exposes a Dash/Flask API and
+dashboard.
 
 🔗 **Live Site**: <https://MrBinnacle.github.io/eth-market-forecasting>
 
@@ -38,19 +39,52 @@ served with Vite while the Python backend exposes a Dash/Flask interface.
 To develop the React frontend separately:
 
 ```bash
-npm install
-npm run dev
+npm install --prefix frontend
+npm start --prefix frontend
 ```
+
+### Project Structure
+
+```
+backend/   # Python API, data pipeline and Dash app
+frontend/  # React dashboard served with Vite
+tests/     # Pytest and Vitest examples
+```
+
+### Architecture
+
+1. **Data Pipeline** – Python scripts under `backend/data_pipeline` fetch market
+   data from Dune, Etherscan and DeFiLlama and store it in SQLite.
+2. **AI Model** – `backend/ai_model` trains a Random Forest model from the
+   stored data and exposes predictions through `backend/api.py`.
+3. **Dash Dashboard** – `backend/dashboard/app.py` displays predictions.
+4. **React Frontend** – `frontend` contains a simple React interface built with
+   Vite and hosted on GitHub Pages.
 
 ### Environment Variables
 
+The project expects a `.env` file in the repository root. The following
+variables are used:
+
 ```
-DUNE_API_KEY=<your-dune-key>
-ETHERSCAN_API_KEY=<your-etherscan-key>
-DEBUG=false
-DASHBOARD_UPDATE_INTERVAL=60000
-API_TIMEOUT=10
+DUNE_API_KEY=<your-dune-key>        # access to Dune Analytics API
+ETHERSCAN_API_KEY=<your-etherscan-key>  # required for gas price queries
+DEBUG=false                        # enable verbose Flask logging
+DASHBOARD_UPDATE_INTERVAL=60000    # dashboard refresh interval in ms
+API_TIMEOUT=10                     # HTTP client timeout in seconds
 ```
+
+**Never commit real API keys**. Use `.env.example` as a template and keep your
+`.env` file private.
+
+### API Endpoints
+
+The Flask API exposes two simple endpoints once the server is running:
+
+- `GET /api/predict` – returns the latest predicted ETH price using the
+  trained model.
+- `GET /api/market-data` – returns the most recent market data stored in the
+  SQLite database.
 
 ## 🧪 Running Tests
 
@@ -63,14 +97,16 @@ API_TIMEOUT=10
 - **Frontend** (Vitest)
 
   ```bash
-  npm run test
+  npm run test --prefix frontend
   ```
 
+- **Security Scan** (Snyk)
 - **Security Scan** (Snyk)
 
   ```bash
   npx snyk test
   ```
+  CI also runs this scan on every pull request.
 
 ## Local Setup
 
@@ -94,7 +130,7 @@ source scripts/setup-python-env.sh
 #### 2. Node + Project Dependencies
 
 ```bash
-npm install
+npm install --prefix frontend
 ```
 
 #### 3. Run Tests
@@ -108,7 +144,7 @@ npm install
 * JavaScript:
 
   ```bash
-  npm run test
+  npm run test --prefix frontend
   ```
 
 #### 4. Security Scan (via Snyk)
@@ -116,4 +152,9 @@ npm install
 ```bash
 npx snyk test
 ```
+
+## Contributing
+
+Contributions are welcome! Please open an issue or submit a pull request.
+For bug reports include steps to reproduce and any relevant logs.
 
