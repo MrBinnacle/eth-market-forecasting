@@ -1,5 +1,8 @@
 # ETH Market Forecasting Dashboard
 
+[![CI](https://github.com/MrBinnacle/eth-market-forecasting/actions/workflows/ci.yml/badge.svg)](https://github.com/MrBinnacle/eth-market-forecasting/actions/workflows/ci.yml)
+[![Snyk](https://snyk.io/test/github/MrBinnacle/eth-market-forecasting/badge.svg)](https://snyk.io/test/github/MrBinnacle/eth-market-forecasting)
+
 This repository contains a small end‑to‑end system for forecasting the price of
 Ethereum.  Market data is fetched and stored in SQLite, a machine‐learning model
 is trained, and a simple dashboard displays predictions.  The React dashboard is
@@ -61,5 +64,11 @@ API_TIMEOUT=10
 
   ```bash
   npm run test
+  ```
+
+- **Security Scan** (Snyk)
+
+  ```bash
+  npx snyk test
   ```
 
